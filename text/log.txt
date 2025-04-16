@@ -1,0 +1,230 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+session_start(); // Start session for login
+if (isset($_POST['login'])) {
+    $server = "localhost";
+    $username = "root";
+    $password = "";
+    $database = "strangers_route";
+
+    // Create a database connection
+    $con = new mysqli($server, $username, $password, $database);
+
+    // Check for connection success
+    if ($con->connect_error) {
+        die("Connection failed: " . $con->connect_error);
+    }
+
+    // Get user input
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    // Prepare SQL statement
+    $stmt = $con->prepare("SELECT * FROM registration WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 1) {
+        $registration = $result->fetch_assoc();
+        error_log("User found"); // Debugging
+
+        // Verify password using password_verify()
+        if (password_verify($password, $registration['password'])) {
+            $_SESSION['userLoggedIn'] = $email;
+            $_SESSION['username'] = $registration['username']; // Store more user details if needed
+            error_log("Password correct"); // Debugging
+            error_log("Redirecting to create.php"); // Debugging
+            header("Location: create.php"); // Redirect to user dashboard 
+            exit();
+        } else {
+            echo "<script>alert('Invalid email or password');</script>";
+        }
+    } else {
+        echo "<script>alert('User not found');</script>";
+    }
+    // Close statement and connection
+    $stmt->close();
+    $con->close();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bg-image {
+            background-image: url('./IMAGES/pexels-artempodrez-7233356.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            max-width: 1000px;
+        }
+
+        /*Animation for fade out */
+         .fade-out {
+            animation: fadeOut 0.8s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+        } 
+
+        /* yaha se cursor wala code h man kre toh hata dena ha ha ha 😂 */
+         body {
+            cursor: none;
+        }
+
+
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            background-color: rgba(21, 97, 238, 0.8);
+            /*Red glow */
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: transform 0.1s ease-out, background-color 0.3s ease-in-out;
+            box-shadow: 0 0 10px rgba(18, 15, 212, 0.5);
+        }
+
+
+        .custom-cursor-trail {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(70, 22, 243, 0.2);
+             /* Faint glow  */
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: transform 0.15s ease-out, background-color 0.3s ease-in-out;
+            box-shadow: 0 0 20px rgba(18, 122, 219, 0.4);
+        }
+
+
+        a:hover,
+        button:hover {
+            cursor: none;
+        }
+
+        a:hover~.custom-cursor,
+        button:hover~.custom-cursor {
+            background-color: rgba(0, 255, 255, 0.8);
+             /* Cyan glow  */
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+
+        a:hover~.custom-cursor-trail,
+        button:hover~.custom-cursor-trail {
+            background-color: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body class="bg-image d-flex justify-content-center align-items-center">
+    <div class="custom-cursor"></div>
+    <div class="custom-cursor-trail"></div>
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div id="loginBox" class="bg-white p-5 w-100 shadow-lg rounded login-container">
+
+            <h2 class="text-center mb-4">Log in</h2>
+
+            <!-- Login Form -->
+            <form action="" method="post">
+                <div class="mb-3">
+                    <label class="form-label fs-5">Enter Your Email</label>
+                    <input type="email" class="form-control rounded fs-5" placeholder="Enter your email" name="email">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fs-5">Password</label>
+                    <input type="password" class="form-control rounded fs-5" placeholder="Enter your password" name="password">
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                    <!-- <a href="#" class="text-primary">Forgot password?</a> -->
+                </div>
+
+                <button id="startBtn" class="btn btn-primary w-100 rounded py-3 fs-5" name="login">
+                    Get Started
+                </button>
+
+                <div class="text-center mt-3">
+                    <p>Not a member? <a href="registration.php" class="text-primary">Register</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.getElementById("startBtn").addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent default form submission
+            console.log("Form Submitted")
+            let loginBox = document.getElementById("loginBox");
+            loginBox.classList.add("fade-out");
+            loginBox.addEventListener("animationend", function() {
+                console.log("Form Submitted"); // Debugging: Log after animation ends
+                document.querySelector("form").submit(); // Submit the form
+            }, {
+                once: true
+            });
+            setTimeout(() => {
+                document.querySelector("form").submit(); // Submit the form
+            }, 200);
+        });
+        document.getElementById("startBtn").addEventListener("click", function(event) {
+    event.preventDefault(); // Prevent default form submission
+    let loginBox = document.getElementById("loginBox");
+    loginBox.classList.add("fade-out");
+    loginBox.addEventListener("animationend", function() {
+        document.querySelector("form").submit(); // Submit the form after fade-out
+    }, {
+        once: true
+    });
+});
+
+        /* yaha se cursor wala code h man kre toh hata dena ha ha ha 😂 */
+        document.addEventListener("mousemove", function(e) {
+            let cursor = document.querySelector(".custom-cursor");
+            let trail = document.querySelector(".custom-cursor-trail");
+            cursor.style.left = `${e.pageX}px`;
+            cursor.style.top = `${e.pageY}px`;
+            setTimeout(() => {
+                trail.style.left = `${e.pageX}px`;
+                trail.style.top = `${e.pageY}px`;
+            }, 50);
+        });
+    </script>
+
+</body>
+
+</html>

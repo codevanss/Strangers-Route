@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" href="images/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <link rel="stylesheet" href="find.css">
+    <title>Strangers Route</title>
+</head>
+
+<!-- JQuery -->
+
+<script>
+    $(document).ready(function() {
+        $("#tripDate").datepicker({
+            dateFormat: "yy-mm-dd", // Format: YYYY-MM-DD
+            changeMonth: true,      // Allow month selection
+            changeYear: true,       // Allow year selection
+            showAnim: "slideDown"   // Animation effect
+        });
+    });
+</script>
+
+
+<body>
+        <header>
+            <div class="logo">
+                <a href="#"><img src="images/tes.png" alt="logo"></a>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="create.php">Customize</a></li>
+                    <!-- <li><a href="login_sign.html"></a></li> -->
+                </ul>
+            </nav>
+        </header>
+    <main>
+        <div class="background" >
+            <div class="text">
+                <h3>Try our new trip planner</h3>
+                <p>Create a day-by-day itinerary<br/>customized to you</p>
+                <button class="customize-btn"><a href="create.php">Customize Your Trip</a></button>
+            </div>
+            <form action="finalresult.php" method="post">
+            <div class="box1">
+                <h2>Search Trip</h2>
+                <input type="text" name="departure" placeholder="Enter your Departure (Country,Region, or City)">
+                <input type="text" name="destination" placeholder="Enter your Destination (Country,Region, or City)">
+                <input type="text" id="tripDate" name="tripdate" class="form-control" placeholder="Select a date">
+                <button>Search Trip</button>
+            </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

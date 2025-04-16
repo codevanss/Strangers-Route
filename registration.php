@@ -1,0 +1,209 @@
+<?php
+$insert = false;
+echo "Outside If Block";
+if(isset($_POST['firstname'])){
+    echo "Inside If Block";
+    $server = "localhost";
+    $username = "root";
+    $password = "";
+    $database = "strangers_route";
+
+    $con = mysqli_connect($server, $username, $password , $database);
+    if(!$con){
+        echo "Connection not established";
+        die("connection to this database failed due to" . mysqli_connect_error());
+    }
+
+    $firstname = $_POST['firstname'];
+    $lastname = $_POST['lastname'];
+    $username = $_POST['username'];
+    $phone_no = $_POST['phone_no'];
+    $city = $_POST['city'];
+    $gender = $_POST['gender'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $conn_password = $_POST['conn_password'];
+
+    if ($password !== $conn_password) {
+        echo "<script>alert('Passwords do not match!');</script>";
+    } else {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $con->prepare("INSERT INTO registration (firstname, lastname, username, phone_no, city, gender, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssss", $firstname, $lastname, $username, $phone_no, $city, $gender, $email, $hashedPassword );
+
+        if ($stmt->execute()) {
+            echo "<script>alert('Registration successful!');</script>";
+            header("Location: LOGIN (1).php");
+            exit();
+        } else {
+            die("Error: " . $stmt->error);
+            echo "<script>alert('Error: Could not register user.');</script>";
+        }
+
+        $stmt->close();
+    }
+
+    $con->close();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background: url('./images/registration_image.jpg') no-repeat center center fixed;
+            background-size: cover;
+            cursor: none;
+        }
+        .fade-out {
+            animation: fadeOut 0.8s ease forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            background-color: rgba(21, 97, 238, 0.8); 
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+            pointer-events: none;
+            transition: transform 0.1s ease-out, background-color 0.3s ease-in-out;
+            box-shadow: 0 0 10px rgba(18, 15, 212, 0.5);
+        }
+        .custom-cursor-trail {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(70, 22, 243, 0.2);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+            pointer-events: none;
+            transition: transform 0.15s ease-out, background-color 0.3s ease-in-out;
+            box-shadow: 0 0 20px rgba(18, 122, 219, 0.4);
+        }
+        a:hover, button:hover {
+            cursor: none;
+        }
+        a:hover ~ .custom-cursor, button:hover ~ .custom-cursor {
+            background-color: rgba(0, 255, 255, 0.8); 
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+        a:hover ~ .custom-cursor-trail, button:hover ~ .custom-cursor-trail {
+            background-color: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <form action="" method="post" name="register" id="registerForm">
+    <div class="custom-cursor"></div>
+    <div class="custom-cursor-trail"></div>
+
+    <div class="container mt-5" style="opacity :0.7;">
+        <div id="registerBox" class="card p-4 shadow">
+            <h3 class="text-center mb-4">Register</h3>
+       
+                <h5 class="mb-3">Personal Details</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control rounded" placeholder="Enter your first name" name="firstname">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control rounded" placeholder="Enter your last name" name="lastname">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control rounded" placeholder="Enter your username" name="username">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" class="form-control rounded" placeholder="Enter your phone number" name="phone_no">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control rounded" placeholder="Enter your city" name="city">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <select class="form-control rounded" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <h5 class="mb-3">Account Details</h5>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control rounded" placeholder="Enter your email" name="email">
+                </div>
+
+                <h5 class="mb-3">Security</h5>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control rounded" placeholder="Create a password" name="password">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control rounded" placeholder="Confirm password" name="conn_password">
+                </div>
+
+                <button type="submit" id="registerBtn" class="btn btn-primary w-100 rounded mt-4" style="padding: 15px; font-size: 18px;">
+                    Register
+                </button>
+           
+            <div class="text-center mt-3">
+                <p>Already have an account? <a href="LOGIN (1).php" class="text-primary">Login</a></p>
+            </div>
+        </div>
+    </div>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // document.getElementById("registerForm").addEventListener("submit", function(event) {
+        //     event.preventDefault(); 
+        //     let registerBox = document.getElementById("registerBox");
+        //     registerBox.classList.add("fade-out"); 
+        //     setTimeout(() => {
+        //         window.location.href = "http://localhost/project/LOGIN%20(1).php";
+        //     }, 800)
+        // });
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault(); 
+            let registerBox = document.getElementById("registerBox");
+            registerBox.classList.add("fade-out"); 
+            setTimeout(() => {
+                event.target.submit();  // Actually submit the form to PHP
+            }, 800);
+        });
+
+        document.addEventListener("mousemove", function (e) {
+            let cursor = document.querySelector(".custom-cursor");
+            let trail = document.querySelector(".custom-cursor-trail");
+            cursor.style.transform = `translate(${e.pageX}px, ${e.pageY}px) scale(1)`;
+            setTimeout(() => {
+                trail.style.transform = `translate(${e.pageX}px, ${e.pageY}px) scale(1.2)`;
+            }, 50);
+        });
+    </script>
+</body>
+</html>

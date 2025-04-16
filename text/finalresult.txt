@@ -1,0 +1,95 @@
+<?php
+$server = "localhost";
+$username = "root";
+$password = "";
+$database = "strangers_route";
+
+// Create a database connection
+$con = new mysqli($server, $username, $password, $database);
+
+// Check for connection errors
+if ($con->connect_error) {
+    die("Connection failed: " . $con->connect_error);
+}
+$result = null; 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $departure = $_POST['departure'];
+    $destination = $_POST['destination'];
+    $tripdate = $_POST['tripdate'];
+
+
+    // Prepare SQL statement
+    $stmt = $con->prepare("SELECT * FROM creator WHERE departure = ? AND destination = ? AND tripdate = ?");
+    $stmt->bind_param("sss", $departure, $destination , $tripdate);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        echo "<h2>Available Trips</h2>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<p>Trip from " . $row['departure'] . " to " . $row['destination'] . " on " . $row['tripdate'] . "</p>";
+            echo "<p>Details: " . $row['details'] . "</p>";
+        }
+    } else {
+        echo "<p>No trips found for this destination.</p>";
+    }
+
+    $stmt->close();
+}
+
+$con->close();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Information</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-dark">
+    <div class="container">
+        <div class="row ">
+            <div class="col">
+                <div class="card ">
+                    <div class="card-header">
+                        <h2 class="display-6 text-center">Result According to Your Compatablity</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered text-center" >
+                            <tr class="bg-dark text-white">
+                                <td>ID</td>
+                                <td>Name</td>
+                                <td>Gender</td>
+                                <td>Passanger Type</td>
+                                <td>Departure</td>
+                                <td>Destination</td>
+                            </tr>
+                            <tr>
+                            <?php
+                            if ($result && $result->num_rows > 0) { // Check if $result exists and has data
+                                while($row = mysqli_fetch_assoc($result))
+                                {
+                            ?>
+                                <td><?php echo $row['creator_id']; ?></td>
+                                <td><?php echo $row['name']; ?></td>
+                                <td><?php echo $row['gender']; ?></td>
+                                <td><?php echo $row['passanger_type']; ?></td>
+                                <td><?php echo $row['departure']; ?></td>
+                                <td><?php echo $row['destination']; ?></td>
+                                <td><?php echo $row['tripdate']; ?></td>
+                            <?php    
+                                }
+                            } else {
+                                echo "<tr><td colspan='6'>No trips found for this destination.</td></tr>";
+                            }
+                            ?>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
